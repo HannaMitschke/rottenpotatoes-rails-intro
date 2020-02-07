@@ -12,13 +12,14 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    if (params[:sort].nil? and params[:ratings].nil? and session[:ratings].nil? and session[:sort].nil?)
+    # very first time user visits page, show all the movies and everything checked
+    if (params[:sort].nil? and params[:ratings].nil? and session[:sort].nil? and session[:ratings].nil?)
       @selected = @all_ratings
       @movies = Movie.all
       @title_hilite = nil
       @release_hilite = nil
     else
-      @sort_by = params[:sort]
+      @sort_by = params[:sort] # get what to sort by from URI
       if @sort_by.nil?
         @sort_by = session[:sort]
       else
@@ -31,13 +32,13 @@ class MoviesController < ApplicationController
         @release_hilite = "hilite"
       end
 
-      @rate = params[:ratings]
-      if  @rate.nil? and session[:ratings].nil?
+      @rate = params[:ratings] # get what to ratings to filter by from URI
+      if  @rate.nil? and session[:ratings].nil? #if both nil, make all ratings selected
         @selected = @all_ratings
       elsif  @rate.nil?
         @selected = session[:ratings]
       else
-        @selected = params[:ratings].keys
+        @selected = @rate.keys # need keys from ratings hash
         session[:ratings] = @selected
       end
       
