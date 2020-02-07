@@ -11,30 +11,38 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sort_by = params[:sort]
-    if @sort_by.nil?
-      @sort_by = session[:sort]
-    else
-      session[:sort] = @sort_by
-    end
-    
-    if @sort_by == 'title' # highlight release data if sorting by release date
-      @title_hilite = "hilite"
-    elsif @sort_by == 'release_date' # highlight release data if sorting by release date
-      @release_hilite = "hilite"
-    end
-    
     @all_ratings = Movie.all_ratings
-    
-    @rate = params[:ratings]
-    if  @rate.nil?
-      @selected = session[:ratings]
+    if (params[:sort].nil? and params[:ratings].nil? and session[:ratings].nil? and session[:sort].nil?)
+      @selected = @all_ratings
+      @movies = Movie.all
+      @title_hilite = nil
+      @release_hilite = nil
     else
-      @selected = params[:ratings].keys
-      session[:ratings] = @selected
+      @sort_by = params[:sort]
+      if @sort_by.nil?
+        @sort_by = session[:sort]
+      else
+        session[:sort] = @sort_by
+      end
+      
+      if @sort_by == 'title' # highlight title if sorting by title
+        @title_hilite = "hilite"
+      elsif @sort_by == 'release_date' # highlight release data if sorting by release date
+        @release_hilite = "hilite"
+      end
+
+      @rate = params[:ratings]
+      if  @rate.nil? and session[:ratings].nil?
+        @selected = @all_ratings
+      elsif  @rate.nil?
+        @selected = session[:ratings]
+      else
+        @selected = params[:ratings].keys
+        session[:ratings] = @selected
+      end
+      
+      @movies = Movie.with_ratings(@selected).order("#{@sort_by}").all
     end
-    
-    @movies = Movie.with_ratings(@selected).order("#{@sort_by}").all
   end
 
   def new
